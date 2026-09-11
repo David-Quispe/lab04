@@ -22,38 +22,65 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BackdropScaffold
 import androidx.compose.material.BackdropValue
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Chip
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberBackdropScaffoldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +89,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.example.lab04.ui.theme.Lab04Theme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -418,4 +446,199 @@ fun SwitchDemo() {
 @Preview(showBackground = true)
 @Composable
 fun SwitchDemoPreview() { Lab04Theme { SwitchDemo() } }
+
+// Controles 2
+
+@Composable
+fun BottomNavigationDemo() {
+    var seleccionado by remember { mutableIntStateOf(0) }
+    BottomNavigation {
+        BottomNavigationItem(
+            selected = seleccionado == 0,
+            onClick = { seleccionado = 0 },
+            icon = { Icon(Icons.Filled.Home, contentDescription = "Inicio") },
+            label = { Text("Inicio") }
+        )
+        BottomNavigationItem(
+            selected = seleccionado == 1,
+            onClick = { seleccionado = 1 },
+            icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") },
+            label = { Text("Perfil") }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BottomNavigationDemoPreview() { Lab04Theme { BottomNavigationDemo() } }
+
+@Composable
+fun DialogDemo() {
+    var mostrar by remember { mutableStateOf(true) }
+    if (mostrar) {
+        androidx.compose.ui.window.Dialog(onDismissRequest = { mostrar = false }) {
+            Surface(shape = RoundedCornerShape(12.dp)) {
+                Text("Contenido personalizado", modifier = Modifier.padding(24.dp))
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DialogDemoPreview() { Lab04Theme { DialogDemo() } }
+
+@Composable
+fun DividerDemo() {
+    Column {
+        Text("Sección 1")
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        Text("Sección 2")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DividerDemoPreview() { Lab04Theme { DividerDemo() } }
+
+@Composable
+fun DropDownMenuDemo() {
+    var expandido by remember { mutableStateOf(true) }
+    Box {
+        Button(onClick = { expandido = true }) { Text("Abrir menú") }
+        DropdownMenu(expanded = expandido, onDismissRequest = { expandido = false }) {
+            DropdownMenuItem(text = { Text("Opción A") }, onClick = { expandido = false })
+            DropdownMenuItem(text = { Text("Opción B") }, onClick = { expandido = false })
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DropDownMenuDemoPreview() { Lab04Theme { DropDownMenuDemo() } }
+
+@Composable
+fun LazyVerticalGridDemo() {
+    LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.height(150.dp)) {
+        items((1..9).toList()) { numero ->
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(40.dp)
+                    .background(MaterialTheme.colorScheme.tertiaryContainer),
+                contentAlignment = Alignment.Center
+            ) { Text("$numero") }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LazyVerticalGridDemoPreview() { Lab04Theme { LazyVerticalGridDemo() } }
+
+@Composable
+fun NavigationRailDemo() {
+    var seleccionado by remember { mutableIntStateOf(0) }
+    NavigationRail {
+        NavigationRailItem(
+            selected = seleccionado == 0,
+            onClick = { seleccionado = 0 },
+            icon = { Icon(Icons.Filled.Home, contentDescription = "Inicio") },
+            label = { Text("Inicio") }
+        )
+        NavigationRailItem(
+            selected = seleccionado == 1,
+            onClick = { seleccionado = 1 },
+            icon = { Icon(Icons.Filled.Settings, contentDescription = "Ajustes") },
+            label = { Text("Ajustes") }
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun NavigationRailDemoPreview() { Lab04Theme { NavigationRailDemo() } }
+
+@Composable
+fun OutlinedTextFieldDemo() {
+    var texto by remember { mutableStateOf("") }
+    OutlinedTextField(value = texto, onValueChange = { texto = it }, label = { Text("Nombre") })
+}
+
+@Preview(showBackground = true)
+@Composable
+fun OutlinedTextFieldDemoPreview() { Lab04Theme { OutlinedTextFieldDemo() } }
+
+@Composable
+fun PagerDemo() {
+    val estado = rememberPagerState(pageCount = { 3 })
+    HorizontalPager(state = estado, modifier = Modifier.height(100.dp)) { pagina ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
+        ) { Text("Página $pagina") }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PagerDemoPreview() { Lab04Theme { PagerDemo() } }
+
+@Composable
+fun SnackbarDemo() {
+    val estadoSnackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    Column {
+        Button(onClick = { scope.launch { estadoSnackbar.showSnackbar("Mensaje de ejemplo") } }) {
+            Text("Mostrar Snackbar")
+        }
+        SnackbarHost(hostState = estadoSnackbar)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SnackbarDemoPreview() {
+    Lab04Theme {
+        Snackbar { Text("Este es un Snackbar") }
+    }
+}
+
+@Composable
+fun TabRowDemo() {
+    var seleccionada by remember { mutableIntStateOf(0) }
+    TabRow(selectedTabIndex = seleccionada) {
+        listOf("Tab 1", "Tab 2", "Tab 3").forEachIndexed { index, titulo ->
+            Tab(
+                selected = seleccionada == index,
+                onClick = { seleccionada = index },
+                text = { Text(titulo) }
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TabRowDemoPreview() { Lab04Theme { TabRowDemo() } }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TooltipDemo() {
+    val estadoTooltip = rememberTooltipState()
+    TooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text("Texto de ayuda") } },
+        state = estadoTooltip
+    ) {
+        Icon(Icons.Filled.Menu, contentDescription = "Tooltip")
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TooltipDemoPreview() { Lab04Theme { TooltipDemo() } }
+
 
